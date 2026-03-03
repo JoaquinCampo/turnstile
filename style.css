@@ -306,6 +306,10 @@ body {
   outline: 1px solid var(--accent-dim);
 }
 
+.proof-line.closed-scope {
+  opacity: 0.4;
+}
+
 .line-depth {
   display: flex;
   gap: 0;

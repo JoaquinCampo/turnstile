@@ -57,7 +57,7 @@ export function createProof(assumptions, goal) {
 }
 
 // Save state for undo
-function saveState(proof) {
+export function saveState(proof) {
   proof.history.push({
     lines: proof.lines.map(l => ({ ...l })),
     scopes: proof.scopes.map(s => ({ ...s })),
@@ -106,8 +106,8 @@ export function visibleLines(proof) {
 }
 
 // Open a new sub-proof scope (for →-intro, ¬-intro, etc.)
-export function openScope(proof, assumption, ruleType) {
-  saveState(proof);
+export function openScope(proof, assumption, ruleType, { skipSave = false } = {}) {
+  if (!skipSave) saveState(proof);
 
   const scopeId = nextScopeId++;
   const depth = proof.currentScopeDepth + 1;

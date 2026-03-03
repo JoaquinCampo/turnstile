@@ -1,7 +1,7 @@
 // rules.js — Natural deduction rules: validation, application, metadata
 
 import { And, Or, Implies, Not, Bottom, equal, format } from './proposition.js';
-import { addLine, openScope, closeScope, getLine, isAccessible, getCurrentScope } from './proof.js';
+import { addLine, openScope, closeScope, getLine, isAccessible, getCurrentScope, saveState } from './proof.js';
 
 // === Rule Definitions ===
 // Each rule has:
@@ -234,6 +234,9 @@ export const RULES = {
       const orLineId = scope._orLineId;
       const rightDisjunct = scope._rightDisjunct;
 
+      // Save state once for atomic undo
+      saveState(proof);
+
       // Close left scope (but don't add conclusion line in parent yet)
       scope.closed = true;
       const leftScopeId = scope.id;
@@ -242,8 +245,8 @@ export const RULES = {
       proof.currentScopeId = scope.parentId ?? 0;
       proof.currentScopeDepth = scope.depth - 1;
 
-      // Open right sub-proof
-      const result = openScope(proof, rightDisjunct, 'or_elim_right');
+      // Open right sub-proof (skip save — already saved above)
+      const result = openScope(proof, rightDisjunct, 'or_elim_right', { skipSave: true });
       const rightScope = proof.scopes.find(s => s.id === result.scopeId);
       rightScope._orLineId = orLineId;
       rightScope._leftScopeId = leftScopeId;

@@ -1,7 +1,7 @@
 // ui.js — DOM rendering and interaction handling
 
 import { format, parse, variables } from './proposition.js';
-import { visibleLines, getCurrentScope, formatJustification, getScopeRanges } from './proof.js';
+import { visibleLines, getCurrentScope, formatJustification, getScopeRanges, isAccessible } from './proof.js';
 import { RULES, forwardRules, scopeOpenRules, scopeCloseRules, getRule } from './rules.js';
 import { LEVELS, WORLDS, getLevelsByWorld } from './levels.js';
 import {
@@ -217,12 +217,16 @@ function renderProofLines(container, proof, lvl) {
     const lineEl = el('div', 'proof-line');
 
     // Determine if this line is selectable (when collecting line inputs)
-    const isSelectable = selectedRule && inputStep < selectedRule.inputs.length
+    const wantsLine = selectedRule && inputStep < selectedRule.inputs.length
       && selectedRule.inputs[inputStep].type === 'line';
+    const accessible = isAccessible(proof, line.id);
+    const isSelectable = wantsLine && accessible;
     const isSelected = collectedInputs.lineIds.includes(line.id);
+    const inClosedScope = !accessible && line.scopeDepth > 0;
 
     if (isSelectable) lineEl.classList.add('selectable');
     if (isSelected) lineEl.classList.add('selected');
+    if (inClosedScope) lineEl.classList.add('closed-scope');
 
     // Scope depth indicator
     const depthEl = el('div', 'line-depth');
