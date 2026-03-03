@@ -22,6 +22,21 @@ let showHint = false;
 export function init() {
   game = createGame();
   render();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (game.screen !== 'level') return;
+    if (e.target.tagName === 'INPUT') return; // don't capture when typing in input
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      e.preventDefault();
+      clearInteraction();
+      undoMove(game);
+      render();
+    } else if (e.key === 'Escape') {
+      if (selectedRule) { clearInteraction(); render(); }
+    }
+  });
 }
 
 // ── Rendering ─────────────────────────────────────────
@@ -253,7 +268,12 @@ function renderProofLines(container, proof, lvl) {
 
     // Click handler for line selection
     if (isSelectable) {
+      lineEl.setAttribute('role', 'button');
+      lineEl.setAttribute('tabindex', '0');
       lineEl.addEventListener('click', () => selectLine(line.id));
+      lineEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectLine(line.id); }
+      });
     }
 
     container.appendChild(lineEl);
@@ -382,7 +402,7 @@ function renderVictory(app) {
 
   const modal = el('div', 'victory-screen');
   modal.innerHTML = `
-    <div class="victory-symbol">\u220E</div>
+    <div class="victory-symbol">\u2713</div>
     <h2 class="victory-title">Q.E.D.</h2>
     <p class="victory-subtitle">${lvl.name} \u2014 proven in ${proof.lines.length} lines</p>
   `;
